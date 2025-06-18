@@ -149,6 +149,52 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 <br/>
 
+### 3. MLflow Experiment Tracking and UI
+
+1. Run MLflow experiment tracking example:
+```bash
+python3 mlflow_test.py
+```
+- Scikit-Learn experiments are automatically tracked and results are saved in the `mlruns/` folder.
+
+2. Launch MLflow UI:
+```bash
+mlflow ui
+```
+- Open [http://localhost:5000](http://localhost:5000) in your browser to visually inspect experiment results.
+
+**Tips**
+- Make sure `mlflow` is included in requirements.txt.
+- Add `mlruns/` to `.gitignore` to avoid committing experiment logs.
+- In Docker, use port mapping (`-p 5050:5050`) to access the UI externally.
+
+**Example file**: `mlflow_test.py`
+
+#### Run predict API and MLflow UI containers with shared mlruns folder
+
+1. Build predict API server image:
+```bash
+docker build -f Dockerfile.predictapi -t mlops-predictapi .
+```
+2. Build MLflow UI image:
+```bash
+docker build -f Dockerfile.mlflowui -t mlops-mlflowui .
+```
+
+3. Run predict API server container (share mlruns):
+```bash
+docker run -p 8000:8000 -v $(pwd)/mlruns:/app/mlruns mlops-predictapi
+```
+4. Run MLflow UI container (share mlruns):
+```bash
+docker run -p 5050:5050 -v $(pwd)/mlruns:/app/mlruns mlops-mlflowui
+```
+5. Open [http://localhost:5050](http://localhost:5050) in your browser
+
+- When both containers share the same mlruns folder, MLflow runs created by the predict API are immediately visible in the UI.
+
+<br/>
+
 ## API Usage
 
 <br/>
@@ -339,3 +385,23 @@ pip install requests
 # Optional for HTTPie examples
 pip install httpie
 ```
+
+## Container Cleanup
+
+To stop and remove all Docker containers and images (use with caution):
+
+```bash
+# Stop all running containers
+docker ps -aq | xargs docker stop
+
+# Remove all containers
+docker ps -aq | xargs docker rm
+
+# Remove all images
+docker images -aq | xargs docker rmi
+```
+
+> **Note:** These commands will stop and delete all containers and images on your system. Use them only if you are sure you want to clean up everything.
+
+
+

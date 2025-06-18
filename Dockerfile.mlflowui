@@ -14,14 +14,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 애플리케이션 코드 복사
 COPY . .
 
-# 데이터 전처리 및 모델 학습 실행
-RUN python preprocess.py && python train_model.py
-
 # MLflow 실험 추적 예제 실행
 RUN python mlflow_test.py
 
-EXPOSE 8000
-EXPOSE 5000
+EXPOSE 5050
 
 # MLflow UI 실행 (컨테이너 실행 시)
 CMD ["mlflow", "ui", "--host", "0.0.0.0"] 

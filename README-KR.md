@@ -147,6 +147,54 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 <br/>
 
+### 3. MLflow 실험 추적 및 UI 실행
+
+1. MLflow 실험 자동 추적 예제 실행:
+```bash
+python3 mlflow_test.py
+```
+- Scikit-Learn 실험이 자동으로 추적되며, 결과는 `mlruns/` 폴더에 저장됩니다.
+
+2. MLflow UI 실행:
+```bash
+mlflow ui
+```
+- 브라우저에서 [http://localhost:5000](http://localhost:5000) 접속 후 실험 결과를 시각적으로 확인할 수 있습니다.
+
+**실무 팁**
+- requirements.txt에 `mlflow`가 포함되어 있어야 합니다.
+- `.gitignore`에 `mlruns/`를 추가해 실험 로그가 git에 포함되지 않도록 관리하세요.
+- Docker 환경에서는 포트 매핑(`-p 5050:5050`)을 통해 외부에서 UI 접근이 가능합니다.
+
+**예제 파일**: `mlflow_test.py`
+
+<br/>
+
+#### Docker에서 예측 API와 MLflow UI를 mlruns 폴더로 연동
+
+1. 예측 API 서버용 이미지 빌드:
+```bash
+docker build -f Dockerfile.predictapi -t mlops-predictapi .
+```
+2. MLflow UI용 이미지 빌드:
+```bash
+docker build -f Dockerfile.mlflowui -t mlops-mlflowui .
+``` 
+
+3. 예측 API 서버 컨테이너 실행(mlruns 공유):
+```bash
+docker run -p 8000:8000 -v $(pwd)/mlruns:/app/mlruns mlops-predictapi
+```
+4. MLflow UI 컨테이너 실행(mlruns 공유):
+```bash
+docker run -p 5050:5050 -v $(pwd)/mlruns:/app/mlruns mlops-mlflowui
+```
+5. 브라우저에서 [http://localhost:5050](http://localhost:5050) 접속
+
+- 두 컨테이너가 같은 mlruns 폴더를 공유하면, 예측 API에서 생성된 MLflow run도 UI에서 바로 확인할 수 있습니다.
+
+<br/>
+
 ## API 사용법
 
 <br/>
@@ -338,4 +386,24 @@ pip install requests
 
 # HTTPie 예제에 선택사항
 pip install httpie
-``` 
+```
+
+<br/>
+
+## 컨테이너/이미지 정리
+
+모든 Docker 컨테이너와 이미지를 정리하려면 아래 명령어를 사용하세요. (주의: 시스템의 모든 컨테이너/이미지가 삭제됩니다!)
+
+```bash
+# 모든 컨테이너 중지
+docker ps -aq | xargs docker stop
+
+# 모든 컨테이너 삭제
+docker ps -aq | xargs docker rm
+
+# 모든 이미지 삭제
+docker images -aq | xargs docker rmi
+```
+
+> **주의:** 위 명령어는 시스템의 모든 컨테이너와 이미지를 삭제합니다. 꼭 필요한 경우에만 사용하세요.
+

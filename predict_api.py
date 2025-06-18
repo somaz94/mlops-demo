@@ -6,6 +6,7 @@ from typing import List
 import uvicorn
 import os
 from fastapi.middleware.cors import CORSMiddleware
+import mlflow
 
 app = FastAPI(title="ML Model API")
 
@@ -65,6 +66,13 @@ async def predict(file: UploadFile = File(...)):
         predictions = model.predict(scaled_data)
         probabilities = model.predict_proba(scaled_data)
         
+        # MLflow 추적
+        with mlflow.start_run(run_name="predict_api_csv"):
+            mlflow.log_param("input_rows", len(df))
+            mlflow.log_param("input_columns", list(df.columns))
+            mlflow.log_metric("prediction_mean", float(np.mean(predictions)))
+            mlflow.log_metric("probability_mean", float(np.mean(probabilities)))
+        
         return {
             "predictions": predictions.tolist(),
             "probabilities": probabilities.tolist()
@@ -94,6 +102,13 @@ async def predict_batch(data: List[dict]):
         # 예측 및 확률 계산
         predictions = model.predict(scaled_data)
         probabilities = model.predict_proba(scaled_data)
+        
+        # MLflow 추적
+        with mlflow.start_run(run_name="predict_api_batch"):
+            mlflow.log_param("input_rows", len(df))
+            mlflow.log_param("input_columns", list(df.columns))
+            mlflow.log_metric("prediction_mean", float(np.mean(predictions)))
+            mlflow.log_metric("probability_mean", float(np.mean(probabilities)))
         
         return {
             "predictions": predictions.tolist(),
