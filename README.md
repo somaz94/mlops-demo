@@ -139,7 +139,7 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ## API Usage
 
-1. Single prediction (CSV file):
+### 1. Single prediction (CSV file)
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
@@ -151,7 +151,7 @@ Result: Returns prediction results in JSON format:
 }
 ```
 
-2. Batch prediction (JSON):
+### 2. Batch prediction (JSON)
 ```bash
 curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
 ```
@@ -161,6 +161,78 @@ Result: Returns prediction results in JSON format:
   "predictions": [1],
   "probabilities": [0.75]
 }
+```
+
+### 3. Using Python requests library
+```python
+import requests
+import pandas as pd
+
+# Predict with CSV file
+with open('data/test.csv', 'rb') as f:
+    files = {'file': f}
+    response = requests.post('http://localhost:8000/predict', files=files)
+    print(response.json())
+
+# Predict with JSON data
+data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]
+response = requests.post('http://localhost:8000/predict_batch', json=data)
+print(response.json())
+```
+
+### 4. Using JavaScript/Fetch API
+```javascript
+// Predict with CSV file
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('http://localhost:8000/predict', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data));
+
+// Predict with JSON data
+const data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}];
+
+fetch('http://localhost:8000/predict_batch', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+### 5. Using Postman
+1. **CSV file prediction**:
+   - Method: POST
+   - URL: `http://localhost:8000/predict`
+   - Body: form-data
+   - Key: `file` (File type)
+   - Value: Select test.csv file
+
+2. **JSON prediction**:
+   - Method: POST
+   - URL: `http://localhost:8000/predict_batch`
+   - Body: raw (JSON)
+   - Content: `[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]`
+
+### 6. Using wget (CSV file)
+```bash
+wget --post-file=data/test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
+```
+
+### 7. Using HTTPie
+```bash
+# CSV file prediction
+http -f POST localhost:8000/predict file@data/test.csv
+
+# JSON prediction
+http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
 ```
 
 <br/>

@@ -137,7 +137,7 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ## API 사용법
 
-1. 단일 예측 (CSV 파일):
+### 1. 단일 예측 (CSV 파일)
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
@@ -149,7 +149,7 @@ curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "C
 }
 ```
 
-2. 배치 예측 (JSON):
+### 2. 배치 예측 (JSON)
 ```bash
 curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
 ```
@@ -159,6 +159,78 @@ curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json"
   "predictions": [1],
   "probabilities": [0.75]
 }
+```
+
+### 3. Python requests 라이브러리 사용
+```python
+import requests
+import pandas as pd
+
+# CSV 파일로 예측
+with open('data/test.csv', 'rb') as f:
+    files = {'file': f}
+    response = requests.post('http://localhost:8000/predict', files=files)
+    print(response.json())
+
+# JSON 데이터로 예측
+data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]
+response = requests.post('http://localhost:8000/predict_batch', json=data)
+print(response.json())
+```
+
+### 4. JavaScript/Fetch API 사용
+```javascript
+// CSV 파일로 예측
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+fetch('http://localhost:8000/predict', {
+    method: 'POST',
+    body: formData
+})
+.then(response => response.json())
+.then(data => console.log(data));
+
+// JSON 데이터로 예측
+const data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}];
+
+fetch('http://localhost:8000/predict_batch', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data)
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+### 5. Postman 사용
+1. **CSV 파일 예측**:
+   - Method: POST
+   - URL: `http://localhost:8000/predict`
+   - Body: form-data
+   - Key: `file` (File type)
+   - Value: test.csv 파일 선택
+
+2. **JSON 예측**:
+   - Method: POST
+   - URL: `http://localhost:8000/predict_batch`
+   - Body: raw (JSON)
+   - Content: `[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]`
+
+### 6. wget 사용 (CSV 파일)
+```bash
+wget --post-file=data/test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
+```
+
+### 7. HTTPie 사용
+```bash
+# CSV 파일 예측
+http -f POST localhost:8000/predict file@data/test.csv
+
+# JSON 예측
+http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
 ```
 
 <br/>
