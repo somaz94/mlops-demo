@@ -119,6 +119,14 @@ Result: Docker image is built and the following message is displayed:
 Sending build context to Docker daemon  XX.XXMB
 Step 1/4 : FROM python:3.13-slim
 ...
+Step 5/7 : RUN python preprocess.py && python train_model.py
+Preprocessing completed:
+- Training data: XX samples
+- Test data: XX samples
+- Features: ['session_duration', 'page_views', 'clicks', 'scroll_depth', 'time_on_site']
+Model Accuracy: 0.XX
+Model saved to model/model.pkl
+...
 Successfully built xxxxxxxxxxxx
 Successfully tagged mlops-demo:latest
 ```
@@ -135,6 +143,8 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
+**Note**: Data preprocessing and model training are automatically executed during Docker build, so you don't need to run `preprocess.py` and `train_model.py` separately.
+
 <br/>
 
 ## API Usage
@@ -149,6 +159,30 @@ Result: Returns prediction results in JSON format:
   "predictions": [0, 1, 0],
   "probabilities": [0.2, 0.8, 0.3]
 }
+```
+
+**Note**: If using Docker, create test.csv first:
+```bash
+# Create test data file
+echo "session_duration,page_views,clicks,scroll_depth,time_on_site
+130,6,9,80,190
+50,2,3,35,65
+170,7,11,85,210" > test.csv
+
+# Then use the file
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
+```
+
+**Important**: If test.csv is in the data/ folder, you need to either:
+1. Change to the data directory first:
+```bash
+cd data/
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
+```
+
+2. Or use the full path from the project root:
+```bash
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
 
 ### 2. Batch prediction (JSON)
@@ -169,7 +203,7 @@ import requests
 import pandas as pd
 
 # Predict with CSV file
-with open('data/test.csv', 'rb') as f:
+with open('test.csv', 'rb') as f:
     files = {'file': f}
     response = requests.post('http://localhost:8000/predict', files=files)
     print(response.json())
@@ -223,16 +257,23 @@ fetch('http://localhost:8000/predict_batch', {
 
 ### 6. Using wget (CSV file)
 ```bash
-wget --post-file=data/test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
+wget --post-file=test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
 ```
 
 ### 7. Using HTTPie
 ```bash
 # CSV file prediction
-http -f POST localhost:8000/predict file@data/test.csv
+http -f POST localhost:8000/predict file@test.csv
 
 # JSON prediction
 http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
+```
+
+### 8. Quick test with inline data (Docker friendly)
+```bash
+# Create test file and predict in one command
+echo "session_duration,page_views,clicks,scroll_depth,time_on_site
+130,6,9,80,190" > test.csv && curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
 ```
 
 <br/>

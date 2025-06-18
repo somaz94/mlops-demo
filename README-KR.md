@@ -117,6 +117,14 @@ docker build -t mlops-demo .
 Sending build context to Docker daemon  XX.XXMB
 Step 1/4 : FROM python:3.13-slim
 ...
+Step 5/7 : RUN python preprocess.py && python train_model.py
+전처리 완료:
+- 학습 데이터: XX 샘플
+- 테스트 데이터: XX 샘플
+- 특성: ['session_duration', 'page_views', 'clicks', 'scroll_depth', 'time_on_site']
+Model Accuracy: 0.XX
+Model saved to model/model.pkl
+...
 Successfully built xxxxxxxxxxxx
 Successfully tagged mlops-demo:latest
 ```
@@ -133,6 +141,8 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
+**참고**: Docker 빌드 시점에 자동으로 데이터 전처리와 모델 학습이 실행되므로, 별도로 `preprocess.py`와 `train_model.py`를 실행할 필요가 없습니다.
+
 <br/>
 
 ## API 사용법
@@ -147,6 +157,30 @@ curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "C
   "predictions": [0, 1, 0],
   "probabilities": [0.2, 0.8, 0.3]
 }
+```
+
+**참고**: Docker 사용 시 test.csv 파일을 먼저 생성하세요:
+```bash
+# 테스트 데이터 파일 생성
+echo "session_duration,page_views,clicks,scroll_depth,time_on_site
+130,6,9,80,190
+50,2,3,35,65
+170,7,11,85,210" > test.csv
+
+# 파일 사용
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
+```
+
+**중요**: test.csv가 data/ 폴더에 있는 경우 다음 중 하나를 선택하세요:
+1. data 디렉토리로 이동 후 실행:
+```bash
+cd data/
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
+```
+
+2. 또는 프로젝트 루트에서 전체 경로 사용:
+```bash
+curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
 
 ### 2. 배치 예측 (JSON)
@@ -167,7 +201,7 @@ import requests
 import pandas as pd
 
 # CSV 파일로 예측
-with open('data/test.csv', 'rb') as f:
+with open('test.csv', 'rb') as f:
     files = {'file': f}
     response = requests.post('http://localhost:8000/predict', files=files)
     print(response.json())
@@ -221,16 +255,23 @@ fetch('http://localhost:8000/predict_batch', {
 
 ### 6. wget 사용 (CSV 파일)
 ```bash
-wget --post-file=data/test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
+wget --post-file=test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
 ```
 
 ### 7. HTTPie 사용
 ```bash
 # CSV 파일 예측
-http -f POST localhost:8000/predict file@data/test.csv
+http -f POST localhost:8000/predict file@test.csv
 
 # JSON 예측
 http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
+```
+
+### 8. 인라인 데이터로 빠른 테스트 (Docker 친화적)
+```bash
+# 테스트 파일 생성과 예측을 한 번에 실행
+echo "session_duration,page_views,clicks,scroll_depth,time_on_site
+130,6,9,80,190" > test.csv && curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
 ```
 
 <br/>
