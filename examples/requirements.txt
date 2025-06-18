@@ -1,0 +1,12 @@
+# Requirements for MLOps Demo API Examples
+# Install with: pip install -r examples/requirements.txt
+
+# For Python examples
+requests>=2.31.0
+
+# For HTTPie examples (optional)
+httpie>=3.2.0
+
+# For web development (optional)
+flask>=2.3.0
+flask-cors>=4.0.0 

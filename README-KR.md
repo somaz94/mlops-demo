@@ -106,6 +106,8 @@ deactivate
 ```
 결과: `(venv)` 프롬프트가 사라지며 가상환경이 비활성화됩니다.
 
+<br/>
+
 ### 2. Docker로 실행
 
 1. Docker 이미지 빌드:
@@ -147,6 +149,8 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ## API 사용법
 
+<br/>
+
 ### 1. 단일 예측 (CSV 파일)
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
@@ -183,6 +187,8 @@ curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "C
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
 
+<br/>
+
 ### 2. 배치 예측 (JSON)
 ```bash
 curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
@@ -194,6 +200,8 @@ curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json"
   "probabilities": [0.75]
 }
 ```
+
+<br/>
 
 ### 3. Python requests 라이브러리 사용
 ```python
@@ -211,6 +219,10 @@ data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 
 response = requests.post('http://localhost:8000/predict_batch', json=data)
 print(response.json())
 ```
+
+**예제 파일**: `examples/python_example.py`
+
+<br/>
 
 ### 4. JavaScript/Fetch API 사용
 ```javascript
@@ -239,6 +251,10 @@ fetch('http://localhost:8000/predict_batch', {
 .then(data => console.log(data));
 ```
 
+**예제 파일**: `examples/web_example.html`, `examples/web_example.js`
+
+<br/>
+
 ### 5. Postman 사용
 1. **CSV 파일 예측**:
    - Method: POST
@@ -253,12 +269,11 @@ fetch('http://localhost:8000/predict_batch', {
    - Body: raw (JSON)
    - Content: `[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]`
 
-### 6. wget 사용 (CSV 파일)
-```bash
-wget --post-file=test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
-```
+**예제 파일**: `examples/postman_collection.json`
 
-### 7. HTTPie 사용
+<br/>
+
+### 6. HTTPie 사용
 ```bash
 # CSV 파일 예측
 http -f POST localhost:8000/predict file@test.csv
@@ -267,12 +282,18 @@ http -f POST localhost:8000/predict file@test.csv
 http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
 ```
 
-### 8. 인라인 데이터로 빠른 테스트 (Docker 친화적)
+**예제 파일**: `examples/httpie_example.sh`
+
+<br/>
+
+### 7. 인라인 데이터로 빠른 테스트 (Docker 친화적)
 ```bash
 # 테스트 파일 생성과 예측을 한 번에 실행
 echo "session_duration,page_views,clicks,scroll_depth,time_on_site
 130,6,9,80,190" > test.csv && curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
 ```
+
+**예제 파일**: `examples/quick_test.sh`
 
 <br/>
 
@@ -280,4 +301,41 @@ echo "session_duration,page_views,clicks,scroll_depth,time_on_site
 
 FastAPI 자동 생성 문서는 다음 URL에서 확인할 수 있습니다:
 - Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc 
+- ReDoc: http://localhost:8000/redoc
+
+<br/>
+
+## 예제
+
+`examples/` 디렉토리는 API를 테스트하고 사용하는 다양한 방법들을 포함합니다:
+
+### 예제 빠른 시작
+```bash
+# 예제 의존성 설치
+pip install -r examples/requirements.txt
+
+# Python 예제 실행
+python examples/python_example.py
+
+# 빠른 테스트 실행
+./examples/quick_test.sh
+
+# 웹 인터페이스 열기
+open examples/web_example.html
+```
+
+### 사용 가능한 예제
+- **Python**: 에러 처리가 포함된 완전한 스크립트 (`python_example.py`)
+- **웹 인터페이스**: 인터랙티브 HTML 페이지 (`web_example.html`)
+- **Postman**: 임포트할 수 있는 컬렉션 (`postman_collection.json`)
+- **셸 스크립트**: 다양한 명령줄 예제
+- **문서**: 자세한 사용법은 `examples/README-KR.md` 참조
+
+### 예제 의존성
+```bash
+# Python 예제에 필수
+pip install requests
+
+# HTTPie 예제에 선택사항
+pip install httpie
+``` 

@@ -108,6 +108,8 @@ deactivate
 ```
 Result: The `(venv)` prompt disappears, indicating the virtual environment is deactivated.
 
+<br/>
+
 ### 2. Docker Setup
 
 1. Build Docker image:
@@ -149,6 +151,8 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ## API Usage
 
+<br/>
+
 ### 1. Single prediction (CSV file)
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
@@ -185,6 +189,8 @@ curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "C
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
 
+<br/>
+
 ### 2. Batch prediction (JSON)
 ```bash
 curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
@@ -196,6 +202,8 @@ Result: Returns prediction results in JSON format:
   "probabilities": [0.75]
 }
 ```
+
+<br/>
 
 ### 3. Using Python requests library
 ```python
@@ -213,6 +221,10 @@ data = [{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 
 response = requests.post('http://localhost:8000/predict_batch', json=data)
 print(response.json())
 ```
+
+**Example file**: `examples/python_example.py`
+
+<br/>
 
 ### 4. Using JavaScript/Fetch API
 ```javascript
@@ -241,6 +253,10 @@ fetch('http://localhost:8000/predict_batch', {
 .then(data => console.log(data));
 ```
 
+**Example files**: `examples/web_example.html`, `examples/web_example.js`
+
+<br/>
+
 ### 5. Using Postman
 1. **CSV file prediction**:
    - Method: POST
@@ -255,12 +271,11 @@ fetch('http://localhost:8000/predict_batch', {
    - Body: raw (JSON)
    - Content: `[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]`
 
-### 6. Using wget (CSV file)
-```bash
-wget --post-file=test.csv --header="Content-Type: multipart/form-data" http://localhost:8000/predict
-```
+**Example files**: `examples/postman_collection.json`
 
-### 7. Using HTTPie
+<br/>
+
+### 6. Using HTTPie
 ```bash
 # CSV file prediction
 http -f POST localhost:8000/predict file@test.csv
@@ -269,12 +284,16 @@ http -f POST localhost:8000/predict file@test.csv
 http POST localhost:8000/predict_batch session_duration:=130 page_views:=6 clicks:=9 scroll_depth:=80 time_on_site:=190
 ```
 
-### 8. Quick test with inline data (Docker friendly)
+**Example file**: `examples/httpie_example.sh`
+
+### 7. Quick test with inline data (Docker friendly)
 ```bash
 # Create test file and predict in one command
 echo "session_duration,page_views,clicks,scroll_depth,time_on_site
 130,6,9,80,190" > test.csv && curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@test.csv"
 ```
+
+**Example file**: `examples/quick_test.sh`
 
 <br/>
 
@@ -283,3 +302,40 @@ echo "session_duration,page_views,clicks,scroll_depth,time_on_site
 FastAPI auto-generated documentation is available at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
+
+<br/>
+
+## Examples
+
+The `examples/` directory contains various ways to test and use the API:
+
+### Quick Start with Examples
+```bash
+# Install example dependencies
+pip install -r examples/requirements.txt
+
+# Run Python example
+python examples/python_example.py
+
+# Run quick test
+./examples/quick_test.sh
+
+# Open web interface
+open examples/web_example.html
+```
+
+### Available Examples
+- **Python**: Complete script with error handling (`python_example.py`)
+- **Web Interface**: Interactive HTML page (`web_example.html`)
+- **Postman**: Import collection (`postman_collection.json`)
+- **Shell Scripts**: Various command-line examples
+- **Documentation**: See `examples/README.md` for detailed usage
+
+### Example Dependencies
+```bash
+# Required for Python examples
+pip install requests
+
+# Optional for HTTPie examples
+pip install httpie
+```

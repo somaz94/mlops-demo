@@ -5,8 +5,18 @@ import joblib
 from typing import List
 import uvicorn
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="ML Model API")
+
+# CORS 미들웨어 추가 (개발용: 전체 허용)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+) 
 
 # 모델과 스케일러 파일 경로 확인
 MODEL_PATH = 'model/model.pkl'
