@@ -50,26 +50,63 @@ mlops-demo/
 python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
+Result: The `(venv)` prompt appears, indicating the virtual environment is activated.
 
 2. Install dependencies:
 ```bash
 pip3 install -r requirements.txt
+```
+Result: Required packages are installed, showing installation progress.
+```
+Collecting numpy>=1.26.0
+Collecting pandas>=2.1.0
+Collecting scikit-learn>=1.3.2
+...
+Successfully installed numpy-1.26.0 pandas-2.1.0 scikit-learn-1.3.2 ...
 ```
 
 3. Preprocess data:
 ```bash
 python3 preprocess.py
 ```
+Result: Data preprocessing completes and the following files are generated:
+```
+data/X.csv  # Preprocessed input data
+data/y.csv  # Preprocessed target data
+data/scaler.pkl  # Scaling parameters
+```
 
 4. Train model:
 ```bash
 python3 train_model.py
+```
+Result: Model training completes and the following file is generated:
+```
+model/model.pkl  # Trained model
+```
+Training results are displayed:
+```
+Model Accuracy: 0.XX
+Model saved to model/model.pkl
 ```
 
 5. Run API server:
 ```bash
 python3 predict_api.py
 ```
+Result: FastAPI server starts and the following message is displayed:
+```
+INFO:     Started server process [xxxxx]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+6. Deactivate virtual environment:
+```bash
+deactivate
+```
+Result: The `(venv)` prompt disappears, indicating the virtual environment is deactivated.
 
 ### 2. Docker Setup
 
@@ -77,10 +114,25 @@ python3 predict_api.py
 ```bash
 docker build -t mlops-demo .
 ```
+Result: Docker image is built and the following message is displayed:
+```
+Sending build context to Docker daemon  XX.XXMB
+Step 1/4 : FROM python:3.13-slim
+...
+Successfully built xxxxxxxxxxxx
+Successfully tagged mlops-demo:latest
+```
 
 2. Run Docker container:
 ```bash
 docker run -p 8000:8000 mlops-demo
+```
+Result: Docker container starts and FastAPI server runs:
+```
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
 <br/>
@@ -91,10 +143,24 @@ docker run -p 8000:8000 mlops-demo
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
+Result: Returns prediction results in JSON format:
+```json
+{
+  "predictions": [0, 1, 0],
+  "probabilities": [0.2, 0.8, 0.3]
+}
+```
 
 2. Batch prediction (JSON):
 ```bash
-curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"feature1": 1.0, "feature2": 2.0}]'
+curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
+```
+Result: Returns prediction results in JSON format:
+```json
+{
+  "predictions": [1],
+  "probabilities": [0.75]
+}
 ```
 
 <br/>

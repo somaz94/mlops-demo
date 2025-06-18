@@ -48,26 +48,63 @@ mlops-demo/
 python3 -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 ```
+결과: `(venv)` 프롬프트가 표시되며 가상환경이 활성화됩니다.
 
 2. 의존성 설치:
 ```bash
 pip3 install -r requirements.txt
+```
+결과: 필요한 패키지들이 설치되며, 설치 진행 상황이 표시됩니다.
+```
+Collecting numpy>=1.26.0
+Collecting pandas>=2.1.0
+Collecting scikit-learn>=1.3.2
+...
+Successfully installed numpy-1.26.0 pandas-2.1.0 scikit-learn-1.3.2 ...
 ```
 
 3. 데이터 전처리:
 ```bash
 python3 preprocess.py
 ```
+결과: 데이터 전처리가 완료되며 다음 파일들이 생성됩니다.
+```
+data/X.csv  # 전처리된 입력 데이터
+data/y.csv  # 전처리된 타겟 데이터
+data/scaler.pkl  # 스케일링 파라미터
+```
 
 4. 모델 학습:
 ```bash
 python3 train_model.py
+```
+결과: 모델 학습이 완료되며 다음 파일이 생성됩니다.
+```
+model/model.pkl  # 학습된 모델
+```
+학습 결과가 출력됩니다:
+```
+Model Accuracy: 0.XX
+Model saved to model/model.pkl
 ```
 
 5. API 서버 실행:
 ```bash
 python3 predict_api.py
 ```
+결과: FastAPI 서버가 시작되며 다음 메시지가 표시됩니다.
+```
+INFO:     Started server process [xxxxx]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+6. 가상환경 비활성화:
+```bash
+deactivate
+```
+결과: `(venv)` 프롬프트가 사라지며 가상환경이 비활성화됩니다.
 
 ### 2. Docker로 실행
 
@@ -75,10 +112,25 @@ python3 predict_api.py
 ```bash
 docker build -t mlops-demo .
 ```
+결과: Docker 이미지가 빌드되며 다음 메시지가 표시됩니다.
+```
+Sending build context to Docker daemon  XX.XXMB
+Step 1/4 : FROM python:3.13-slim
+...
+Successfully built xxxxxxxxxxxx
+Successfully tagged mlops-demo:latest
+```
 
 2. Docker 컨테이너 실행:
 ```bash
 docker run -p 8000:8000 mlops-demo
+```
+결과: Docker 컨테이너가 시작되며 FastAPI 서버가 실행됩니다.
+```
+INFO:     Started server process [1]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 ```
 
 <br/>
@@ -89,10 +141,24 @@ docker run -p 8000:8000 mlops-demo
 ```bash
 curl -X POST "http://localhost:8000/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@data/test.csv"
 ```
+결과: JSON 형식의 예측 결과가 반환됩니다.
+```json
+{
+  "predictions": [0, 1, 0],
+  "probabilities": [0.2, 0.8, 0.3]
+}
+```
 
 2. 배치 예측 (JSON):
 ```bash
-curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"feature1": 1.0, "feature2": 2.0}]'
+curl -X POST "http://localhost:8000/predict_batch" -H "accept: application/json" -H "Content-Type: application/json" -d '[{"session_duration": 130, "page_views": 6, "clicks": 9, "scroll_depth": 80, "time_on_site": 190}]'
+```
+결과: JSON 형식의 예측 결과가 반환됩니다.
+```json
+{
+  "predictions": [1],
+  "probabilities": [0.75]
+}
 ```
 
 <br/>
